@@ -2,6 +2,8 @@ package campaign
 
 import (
 	"context"
+	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -15,13 +17,13 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 type Campaign struct {
-	ID        string  `json:"id"`
-	CompanyID string  `json:"company_id"`
-	SegmentID *string `json:"segment_id"`
-	Name      string  `json:"name"`
-	Message   string  `json:"message"`
-	Status    string  `json:"status"`
-	CreatedAt string  `json:"created_at"`
+	ID        string    `json:"id"`
+	CompanyID string    `json:"company_id"`
+	SegmentID *string   `json:"segment_id"`
+	Name      string    `json:"name"`
+	Message   string    `json:"message"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (r *Repository) Create(ctx context.Context, c Campaign) (Campaign, error) {
@@ -43,6 +45,7 @@ func (r *Repository) List(ctx context.Context, companyID string) ([]Campaign, er
 		ORDER BY created_at DESC
 	`, companyID)
 	if err != nil {
+		log.Printf("erro ao listar campanhas: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -51,6 +54,7 @@ func (r *Repository) List(ctx context.Context, companyID string) ([]Campaign, er
 	for rows.Next() {
 		var c Campaign
 		if err := rows.Scan(&c.ID, &c.CompanyID, &c.SegmentID, &c.Name, &c.Message, &c.Status, &c.CreatedAt); err != nil {
+			log.Printf("erro ao escanear campanha: %v", err)
 			return nil, err
 		}
 		campaigns = append(campaigns, c)

@@ -15,10 +15,10 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 type Contact struct {
-	ID        string
-	CompanyID string
-	Name      string
-	Phone     string
+	ID        string `json:"id"`
+	CompanyID string `json:"company_id"`
+	Name      string `json:"name"`
+	Phone     string `json:"phone"`
 }
 
 func (r *Repository) Upsert(ctx context.Context, c Contact) error {

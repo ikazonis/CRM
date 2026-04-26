@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import Navbar from '../components/Navbar'
 
 interface Contact {
-  ID: string
-  Name: string
-  Phone: string
+  id: string
+  name: string
+  phone: string
 }
 
 export default function Contacts() {
@@ -20,19 +21,9 @@ export default function Contacts() {
       .finally(() => setLoading(false))
   }, [])
 
-  function logout() {
-    localStorage.removeItem('token')
-    navigate('/login')
-  }
-
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      <nav className="bg-gray-900 px-6 py-4 flex justify-between items-center border-b border-gray-800">
-        <h1 className="text-lg font-bold text-green-400">CRM WhatsApp</h1>
-        <button onClick={logout} className="text-sm text-gray-400 hover:text-white transition">
-          Sair
-        </button>
-      </nav>
+      <Navbar />
 
       <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-6">
@@ -74,9 +65,9 @@ export default function Contacts() {
               </thead>
               <tbody>
                 {contacts.map(c => (
-                  <tr key={c.ID} className="border-b border-gray-800 hover:bg-gray-800 transition">
-                    <td className="px-6 py-4">{c.Name}</td>
-                    <td className="px-6 py-4 text-gray-400">{c.Phone}</td>
+                  <tr key={c.id} className="border-b border-gray-800 hover:bg-gray-800 transition">
+                    <td className="px-6 py-4">{c.name}</td>
+                    <td className="px-6 py-4 text-gray-400">{c.phone}</td>
                   </tr>
                 ))}
               </tbody>
