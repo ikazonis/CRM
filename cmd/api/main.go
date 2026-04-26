@@ -78,6 +78,7 @@ func main() {
 	protected.HandleFunc("POST /campaigns", campaignHandler.Create)
 	protected.HandleFunc("GET /campaigns/{id}/preview", campaignHandler.Preview)
 	protected.HandleFunc("GET /dashboard", dashboardHandler.Stats)
+	protected.HandleFunc("DELETE /contacts", contactHandler.DeleteAll)
 
 	mux.Handle("/", authSvc.Middleware(protected))
 

@@ -21,6 +21,12 @@ export default function Contacts() {
       .finally(() => setLoading(false))
   }, [])
 
+  async function handleDeleteAll() {
+    if (!confirm('Tem certeza que deseja remover todos os contatos?')) return
+    await api.delete('/contacts')
+    setContacts([])
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <Navbar />
@@ -28,24 +34,34 @@ export default function Contacts() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Contatos</h2>
-          <label className="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">
-            Importar CSV
-            <input
-              type="file"
-              accept=".csv"
-              className="hidden"
-              onChange={async e => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                const form = new FormData()
-                form.append('file', file)
-                const res = await api.post('/contacts/import', form)
-                alert(`Importados: ${res.data.imported} | Pulados: ${res.data.skipped}`)
-                const updated = await api.get('/contacts')
-                setContacts(updated.data || [])
-              }}
-            />
-          </label>
+          <div className="flex gap-3">
+            {contacts.length > 0 && (
+              <button
+                onClick={handleDeleteAll}
+                className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
+              >
+                Limpar contatos
+              </button>
+            )}
+            <label className="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">
+              Importar CSV
+              <input
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={async e => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  const form = new FormData()
+                  form.append('file', file)
+                  const res = await api.post('/contacts/import', form)
+                  alert(`Importados: ${res.data.imported} | Pulados: ${res.data.skipped}`)
+                  const updated = await api.get('/contacts')
+                  setContacts(updated.data || [])
+                }}
+              />
+            </label>
+          </div>
         </div>
 
         {loading ? (

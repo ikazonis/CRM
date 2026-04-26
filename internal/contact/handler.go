@@ -56,3 +56,18 @@ func (h *Handler) ImportCSV(w http.ResponseWriter, r *http.Request) {
 		"skipped":  skipped,
 	})
 }
+
+func (h *Handler) DeleteAll(w http.ResponseWriter, r *http.Request) {
+	companyID, ok := r.Context().Value(auth.ContextCompanyID).(string)
+	if !ok {
+		httputil.Error(w, http.StatusUnauthorized, "não autorizado")
+		return
+	}
+
+	if err := h.svc.DeleteAll(r.Context(), companyID); err != nil {
+		httputil.Error(w, http.StatusInternalServerError, "erro ao limpar contatos")
+		return
+	}
+
+	httputil.JSON(w, http.StatusOK, map[string]string{"message": "contatos removidos"})
+}

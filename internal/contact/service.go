@@ -64,3 +64,7 @@ func (s *Service) ImportCSV(ctx context.Context, companyID string, r io.Reader) 
 
 	return imported, skipped, nil
 }
+
+func (s *Service) DeleteAll(ctx context.Context, companyID string) error {
+	return s.repo.DeleteAll(ctx, companyID)
+}

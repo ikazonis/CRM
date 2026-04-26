@@ -52,3 +52,10 @@ func (r *Repository) ListByCompany(ctx context.Context, companyID string) ([]Con
 	}
 	return contacts, nil
 }
+
+func (r *Repository) DeleteAll(ctx context.Context, companyID string) error {
+	_, err := r.db.Exec(ctx, `
+		DELETE FROM contacts WHERE company_id = $1
+	`, companyID)
+	return err
+}
