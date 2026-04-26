@@ -8,6 +8,7 @@ import (
 	"github.com/ikazonis/CRM/internal/campaign"
 	"github.com/ikazonis/CRM/internal/config"
 	"github.com/ikazonis/CRM/internal/contact"
+	"github.com/ikazonis/CRM/internal/dashboard"
 	"github.com/ikazonis/CRM/internal/db"
 	"github.com/ikazonis/CRM/internal/segment"
 )
@@ -51,6 +52,11 @@ func main() {
 	campaignSvc := campaign.NewService(campaignRepo)
 	campaignHandler := campaign.NewHandler(campaignSvc)
 
+	// dashboard
+	dashboardRepo := dashboard.NewRepository(pool)
+	dashboardSvc := dashboard.NewService(dashboardRepo)
+	dashboardHandler := dashboard.NewHandler(dashboardSvc)
+
 	mux := http.NewServeMux()
 
 	// público
@@ -71,6 +77,7 @@ func main() {
 	protected.HandleFunc("GET /campaigns", campaignHandler.List)
 	protected.HandleFunc("POST /campaigns", campaignHandler.Create)
 	protected.HandleFunc("GET /campaigns/{id}/preview", campaignHandler.Preview)
+	protected.HandleFunc("GET /dashboard", dashboardHandler.Stats)
 
 	mux.Handle("/", authSvc.Middleware(protected))
 

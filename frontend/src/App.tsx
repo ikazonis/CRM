@@ -3,6 +3,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Contacts from './pages/Contacts'
 import Campaigns from './pages/Campaigns'
+import Dashboard from './pages/Dashboard'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -18,23 +19,10 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/contacts"
-          element={
-            <PrivateRoute>
-              <Contacts />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/campaigns"
-          element={
-            <PrivateRoute>
-              <Campaigns />
-            </PrivateRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/contacts" replace />} />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/contacts" element={<PrivateRoute><Contacts /></PrivateRoute>} />
+        <Route path="/campaigns" element={<PrivateRoute><Campaigns /></PrivateRoute>} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   )
