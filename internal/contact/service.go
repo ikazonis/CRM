@@ -3,6 +3,7 @@ package contact
 import (
 	"context"
 	"encoding/csv"
+	"fmt"
 	"io"
 
 	"github.com/ikazonis/CRM/pkg/validate"
@@ -20,11 +21,34 @@ func (s *Service) List(ctx context.Context, companyID string) ([]Contact, error)
 	return s.repo.ListByCompany(ctx, companyID)
 }
 
+func (s *Service) Create(ctx context.Context, companyID, name, phone string) error {
+	normalized, ok := validate.NormalizePhone(phone)
+	if !ok {
+		return fmt.Errorf("telefone inválido")
+	}
+	return s.repo.Upsert(ctx, Contact{
+		CompanyID: companyID,
+		Name:      name,
+		Phone:     normalized,
+	})
+}
+
+func (s *Service) Update(ctx context.Context, id, companyID, name, phone string) error {
+	return s.repo.Update(ctx, id, companyID, name, phone)
+}
+
+func (s *Service) Delete(ctx context.Context, id, companyID string) error {
+	return s.repo.Delete(ctx, id, companyID)
+}
+
+func (s *Service) DeleteAll(ctx context.Context, companyID string) error {
+	return s.repo.DeleteAll(ctx, companyID)
+}
+
 func (s *Service) ImportCSV(ctx context.Context, companyID string, r io.Reader) (int, int, error) {
 	reader := csv.NewReader(r)
 	reader.TrimLeadingSpace = true
 
-	// pula cabeçalho
 	if _, err := reader.Read(); err != nil {
 		return 0, 0, err
 	}
@@ -63,8 +87,4 @@ func (s *Service) ImportCSV(ctx context.Context, companyID string, r io.Reader) 
 	}
 
 	return imported, skipped, nil
-}
-
-func (s *Service) DeleteAll(ctx context.Context, companyID string) error {
-	return s.repo.DeleteAll(ctx, companyID)
 }

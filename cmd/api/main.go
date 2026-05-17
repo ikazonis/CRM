@@ -33,33 +33,27 @@ func main() {
 	pool := db.Connect(cfg.DatabaseURL)
 	defer pool.Close()
 
-	// auth
 	authSvc := auth.NewService(pool, cfg.JWTSecret, cfg.JWTExpiryHours)
 	authHandler := auth.NewHandler(authSvc)
 
-	// contacts
 	contactRepo := contact.NewRepository(pool)
 	contactSvc := contact.NewService(contactRepo)
 	contactHandler := contact.NewHandler(contactSvc)
 
-	// segments
 	segmentRepo := segment.NewRepository(pool)
 	segmentSvc := segment.NewService(segmentRepo)
 	segmentHandler := segment.NewHandler(segmentSvc)
 
-	// campaigns
 	campaignRepo := campaign.NewRepository(pool)
 	campaignSvc := campaign.NewService(campaignRepo)
 	campaignHandler := campaign.NewHandler(campaignSvc)
 
-	// dashboard
 	dashboardRepo := dashboard.NewRepository(pool)
 	dashboardSvc := dashboard.NewService(dashboardRepo)
 	dashboardHandler := dashboard.NewHandler(dashboardSvc)
 
 	mux := http.NewServeMux()
 
-	// público
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"ok"}`))
@@ -67,10 +61,13 @@ func main() {
 	mux.HandleFunc("POST /register", authHandler.Register)
 	mux.HandleFunc("POST /login", authHandler.Login)
 
-	// protegido
 	protected := http.NewServeMux()
 	protected.HandleFunc("GET /contacts", contactHandler.List)
+	protected.HandleFunc("POST /contacts", contactHandler.Create)
 	protected.HandleFunc("POST /contacts/import", contactHandler.ImportCSV)
+	protected.HandleFunc("DELETE /contacts", contactHandler.DeleteAll)
+	protected.HandleFunc("PUT /contacts/{id}", contactHandler.Update)
+	protected.HandleFunc("DELETE /contacts/{id}", contactHandler.Delete)
 	protected.HandleFunc("GET /segments", segmentHandler.List)
 	protected.HandleFunc("POST /segments", segmentHandler.Create)
 	protected.HandleFunc("POST /segments/contacts", segmentHandler.Contacts)
@@ -78,7 +75,6 @@ func main() {
 	protected.HandleFunc("POST /campaigns", campaignHandler.Create)
 	protected.HandleFunc("GET /campaigns/{id}/preview", campaignHandler.Preview)
 	protected.HandleFunc("GET /dashboard", dashboardHandler.Stats)
-	protected.HandleFunc("DELETE /contacts", contactHandler.DeleteAll)
 
 	mux.Handle("/", authSvc.Middleware(protected))
 
