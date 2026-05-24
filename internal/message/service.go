@@ -12,16 +12,18 @@ import (
 )
 
 type Service struct {
-	instanceID string
-	token      string
-	httpClient *http.Client
+	instanceID  string
+	token       string
+	clientToken string
+	httpClient  *http.Client
 }
 
 func NewService() *Service {
 	return &Service{
-		instanceID: os.Getenv("ZAPI_INSTANCE_ID"),
-		token:      os.Getenv("ZAPI_TOKEN"),
-		httpClient: &http.Client{Timeout: 10 * time.Second},
+		instanceID:  os.Getenv("ZAPI_INSTANCE_ID"),
+		token:       os.Getenv("ZAPI_TOKEN"),
+		clientToken: os.Getenv("ZAPI_CLIENT_TOKEN"),
+		httpClient:  &http.Client{Timeout: 10 * time.Second},
 	}
 }
 
@@ -48,6 +50,7 @@ func (s *Service) SendText(ctx context.Context, phone, text string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Client-Token", s.clientToken)
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
@@ -80,7 +83,6 @@ func (s *Service) SendCampaign(ctx context.Context, phones []string, messageTemp
 		}
 		results = append(results, result)
 
-		// rate limiting — 1 segundo entre mensagens
 		time.Sleep(1 * time.Second)
 	}
 
