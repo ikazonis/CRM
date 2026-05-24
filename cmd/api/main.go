@@ -11,6 +11,7 @@ import (
 	"github.com/ikazonis/CRM/internal/dashboard"
 	"github.com/ikazonis/CRM/internal/db"
 	"github.com/ikazonis/CRM/internal/segment"
+	"github.com/ikazonis/CRM/internal/webhook"
 )
 
 func corsMiddleware(next http.Handler) http.Handler {
@@ -54,13 +55,16 @@ func main() {
 
 	mux := http.NewServeMux()
 
+	// público
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"ok"}`))
 	})
 	mux.HandleFunc("POST /register", authHandler.Register)
 	mux.HandleFunc("POST /login", authHandler.Login)
+	mux.HandleFunc("/webhook/whatsapp", webhook.Handler)
 
+	// protegido
 	protected := http.NewServeMux()
 	protected.HandleFunc("GET /contacts", contactHandler.List)
 	protected.HandleFunc("POST /contacts", contactHandler.Create)
