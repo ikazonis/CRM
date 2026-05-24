@@ -83,6 +83,9 @@ func main() {
 	protected.HandleFunc("POST /campaigns", campaignHandler.Create)
 	protected.HandleFunc("GET /campaigns/{id}/preview", campaignHandler.Preview)
 	protected.HandleFunc("POST /campaigns/{id}/send", messageHandler.Send)
+	protected.HandleFunc("PUT /campaigns/{id}", campaignHandler.Update)
+	protected.HandleFunc("DELETE /campaigns/{id}", campaignHandler.Delete)
+	// protected.HandleFunc("DELETE /contacts", contactHandler.DeleteAll)
 	protected.HandleFunc("POST /messages/test", messageHandler.SendTest)
 	protected.HandleFunc("GET /dashboard", dashboardHandler.Stats)
 
