@@ -16,6 +16,7 @@ export default function Campaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editing, setEditing] = useState<Campaign | null>(null)
   const [name, setName] = useState('')
   const [message, setMessage] = useState('')
   const [preview, setPreview] = useState('')
@@ -37,20 +38,55 @@ export default function Campaigns() {
     return msg.replace('{{nome}}', 'João Silva')
   }
 
-  async function handleCreate(e: React.FormEvent) {
+  function openCreate() {
+    setEditing(null)
+    setName('')
+    setMessage('')
+    setPreview('')
+    setShowForm(true)
+  }
+
+  function openEdit(c: Campaign) {
+    setEditing(c)
+    setName(c.name)
+    setMessage(c.message)
+    setPreview(renderPreview(c.message))
+    setShowForm(true)
+  }
+
+  function closeForm() {
+    setShowForm(false)
+    setEditing(null)
+    setName('')
+    setMessage('')
+    setPreview('')
+  }
+
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
     try {
-      const res = await api.post('/campaigns', { name, message })
-      setCampaigns(prev => [res.data, ...prev])
-      setName('')
-      setMessage('')
-      setPreview('')
-      setShowForm(false)
+      if (editing) {
+        await api.put(`/campaigns/${editing.id}`, { name, message })
+      } else {
+        await api.post('/campaigns', { name, message })
+      }
+      await loadCampaigns()
+      closeForm()
     } catch {
-      alert('Erro ao criar campanha')
+      alert('Erro ao salvar campanha')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Deseja remover esta campanha?')) return
+    try {
+      await api.delete(`/campaigns/${id}`)
+      setCampaigns(prev => prev.filter(c => c.id !== id))
+    } catch {
+      alert('Não é possível remover uma campanha já enviada')
     }
   }
 
@@ -76,7 +112,7 @@ export default function Campaigns() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Campanhas</h2>
           <button
-            onClick={() => setShowForm(!showForm)}
+            onClick={openCreate}
             className="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
           >
             Nova campanha
@@ -85,8 +121,10 @@ export default function Campaigns() {
 
         {showForm && (
           <div className="bg-gray-900 rounded-xl p-6 mb-6">
-            <h3 className="text-lg font-semibold mb-4">Nova campanha</h3>
-            <form onSubmit={handleCreate} className="space-y-4">
+            <h3 className="text-lg font-semibold mb-4">
+              {editing ? 'Editar campanha' : 'Nova campanha'}
+            </h3>
+            <form onSubmit={handleSave} className="space-y-4">
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">Nome da campanha</label>
                 <input
@@ -128,11 +166,11 @@ export default function Campaigns() {
                   disabled={saving}
                   className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-lg transition disabled:opacity-50"
                 >
-                  {saving ? 'Salvando...' : 'Criar campanha'}
+                  {saving ? 'Salvando...' : 'Salvar'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowForm(false)}
+                  onClick={closeForm}
                   className="bg-gray-800 hover:bg-gray-700 text-white font-semibold px-6 py-2 rounded-lg transition"
                 >
                   Cancelar
@@ -157,7 +195,7 @@ export default function Campaigns() {
                     <h3 className="font-semibold text-white">{c.name}</h3>
                     <p className="text-gray-400 text-sm mt-1">{c.message}</p>
                   </div>
-                  <div className="flex items-center gap-3 ml-4">
+                  <div className="flex items-center gap-2 ml-4">
                     <span className={`text-xs px-3 py-1 rounded-full font-medium ${
                       c.status === 'draft' ? 'bg-gray-800 text-gray-400' :
                       c.status === 'sent' ? 'bg-green-900 text-green-400' :
@@ -166,13 +204,27 @@ export default function Campaigns() {
                       {c.status === 'draft' ? 'Rascunho' : c.status === 'sent' ? 'Enviado' : c.status}
                     </span>
                     {c.status === 'draft' && (
-                      <button
-                        onClick={() => handleSend(c.id)}
-                        disabled={sending === c.id}
-                        className="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50"
-                      >
-                        {sending === c.id ? 'Disparando...' : '▶ Disparar'}
-                      </button>
+                      <>
+                        <button
+                          onClick={() => openEdit(c)}
+                          className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg transition"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(c.id)}
+                          className="text-xs bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition"
+                        >
+                          Excluir
+                        </button>
+                        <button
+                          onClick={() => handleSend(c.id)}
+                          disabled={sending === c.id}
+                          className="text-xs bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-1 rounded-lg transition disabled:opacity-50"
+                        >
+                          {sending === c.id ? 'Disparando...' : '▶ Disparar'}
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
