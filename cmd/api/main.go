@@ -73,7 +73,7 @@ func main() {
 	protected.HandleFunc("GET /contacts", contactHandler.List)
 	protected.HandleFunc("POST /contacts", contactHandler.Create)
 	protected.HandleFunc("POST /contacts/import", contactHandler.ImportCSV)
-	protected.HandleFunc("DELETE /contacts", contactHandler.DeleteAll)
+	// protected.HandleFunc("DELETE /contacts", contactHandler.DeleteAll)
 	protected.HandleFunc("PUT /contacts/{id}", contactHandler.Update)
 	protected.HandleFunc("DELETE /contacts/{id}", contactHandler.Delete)
 	protected.HandleFunc("GET /segments", segmentHandler.List)
