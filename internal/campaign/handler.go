@@ -66,6 +66,49 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 	httputil.JSON(w, http.StatusOK, campaigns)
 }
 
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
+	companyID, ok := r.Context().Value(auth.ContextCompanyID).(string)
+	if !ok {
+		httputil.Error(w, http.StatusUnauthorized, "não autorizado")
+		return
+	}
+
+	id := strings.TrimPrefix(r.URL.Path, "/campaigns/")
+
+	var req struct {
+		Name    string `json:"name"`
+		Message string `json:"message"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		httputil.Error(w, http.StatusBadRequest, "payload inválido")
+		return
+	}
+
+	if err := h.svc.Update(r.Context(), id, companyID, req.Name, req.Message); err != nil {
+		httputil.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	httputil.JSON(w, http.StatusOK, map[string]string{"message": "campanha atualizada"})
+}
+
+func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
+	companyID, ok := r.Context().Value(auth.ContextCompanyID).(string)
+	if !ok {
+		httputil.Error(w, http.StatusUnauthorized, "não autorizado")
+		return
+	}
+
+	id := strings.TrimPrefix(r.URL.Path, "/campaigns/")
+
+	if err := h.svc.Delete(r.Context(), id, companyID); err != nil {
+		httputil.Error(w, http.StatusInternalServerError, "erro ao deletar campanha")
+		return
+	}
+
+	httputil.JSON(w, http.StatusOK, map[string]string{"message": "campanha removida"})
+}
+
 func (h *Handler) Preview(w http.ResponseWriter, r *http.Request) {
 	companyID, ok := r.Context().Value(auth.ContextCompanyID).(string)
 	if !ok {

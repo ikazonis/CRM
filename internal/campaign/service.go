@@ -31,6 +31,14 @@ func (s *Service) GetByID(ctx context.Context, id, companyID string) (Campaign, 
 	return s.repo.GetByID(ctx, id, companyID)
 }
 
+func (s *Service) Update(ctx context.Context, id, companyID, name, message string) error {
+	return s.repo.Update(ctx, id, companyID, name, message)
+}
+
+func (s *Service) Delete(ctx context.Context, id, companyID string) error {
+	return s.repo.Delete(ctx, id, companyID)
+}
+
 func (s *Service) Preview(ctx context.Context, id, companyID string) (string, error) {
 	c, err := s.repo.GetByID(ctx, id, companyID)
 	if err != nil {

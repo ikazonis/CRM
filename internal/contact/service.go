@@ -41,9 +41,9 @@ func (s *Service) Delete(ctx context.Context, id, companyID string) error {
 	return s.repo.Delete(ctx, id, companyID)
 }
 
-func (s *Service) DeleteAll(ctx context.Context, companyID string) error {
-	return s.repo.DeleteAll(ctx, companyID)
-}
+// func (s *Service) DeleteAll(ctx context.Context, companyID string) error {
+// 	return s.repo.DeleteAll(ctx, companyID)
+// }
 
 func (s *Service) ImportCSV(ctx context.Context, companyID string, r io.Reader) (int, int, error) {
 	reader := csv.NewReader(r)

@@ -75,11 +75,11 @@ export default function Contacts() {
     setContacts(prev => prev.filter(c => c.id !== id))
   }
 
-  async function handleDeleteAll() {
-    if (!confirm('Tem certeza que deseja remover todos os contatos?')) return
-    await api.delete('/contacts')
-    setContacts([])
-  }
+  // async function handleDeleteAll() {
+  //   if (!confirm('Tem certeza que deseja remover todos os contatos?')) return
+  //   await api.delete('/contacts')
+  //   setContacts([])
+  // }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -89,14 +89,14 @@ export default function Contacts() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Contatos</h2>
           <div className="flex gap-3">
-            {contacts.length > 0 && (
+            {/* {contacts.length > 0 && (
               <button
                 onClick={handleDeleteAll}
                 className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
               >
                 Limpar tudo
               </button>
-            )}
+            )} */}
             <label className="bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">
               Importar CSV
               <input

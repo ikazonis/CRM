@@ -2,6 +2,7 @@ package campaign
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -72,6 +73,27 @@ func (r *Repository) GetByID(ctx context.Context, id, companyID string) (Campaig
 		&c.ID, &c.CompanyID, &c.SegmentID, &c.Name, &c.Message, &c.Status, &c.CreatedAt,
 	)
 	return c, err
+}
+
+func (r *Repository) Update(ctx context.Context, id, companyID, name, message string) error {
+	result, err := r.db.Exec(ctx, `
+		UPDATE campaigns SET name = $1, message = $2
+		WHERE id = $3 AND company_id = $4 AND status = 'draft'
+	`, name, message, id, companyID)
+	if err != nil {
+		return err
+	}
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("campanha não pode ser editada")
+	}
+	return nil
+}
+
+func (r *Repository) Delete(ctx context.Context, id, companyID string) error {
+	_, err := r.db.Exec(ctx, `
+		DELETE FROM campaigns WHERE id = $1 AND company_id = $2 AND status = 'draft'
+	`, id, companyID)
+	return err
 }
 
 func (r *Repository) UpdateStatus(ctx context.Context, id, companyID, status string) error {
