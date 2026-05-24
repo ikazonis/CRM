@@ -138,10 +138,10 @@ func (h *Handler) DeleteAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.svc.DeleteAll(r.Context(), companyID); err != nil {
-		httputil.Error(w, http.StatusInternalServerError, "erro ao limpar contatos")
-		return
-	}
+	// if err := h.svc.DeleteAll(r.Context(), companyID); err != nil {
+	// 	httputil.Error(w, http.StatusInternalServerError, "erro ao limpar contatos")
+	// 	return
+	// }
 
 	httputil.JSON(w, http.StatusOK, map[string]string{"message": "contatos removidos"})
 }
