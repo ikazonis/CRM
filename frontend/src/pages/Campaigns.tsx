@@ -20,13 +20,18 @@ export default function Campaigns() {
   const [message, setMessage] = useState('')
   const [preview, setPreview] = useState('')
   const [saving, setSaving] = useState(false)
+  const [sending, setSending] = useState<string | null>(null)
 
   useEffect(() => {
+    loadCampaigns()
+  }, [])
+
+  async function loadCampaigns() {
     api.get('/campaigns')
       .then(res => setCampaigns(res.data || []))
       .catch(() => navigate('/login'))
       .finally(() => setLoading(false))
-  }, [])
+  }
 
   function renderPreview(msg: string) {
     return msg.replace('{{nome}}', 'João Silva')
@@ -46,6 +51,20 @@ export default function Campaigns() {
       alert('Erro ao criar campanha')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleSend(id: string) {
+    if (!confirm('Deseja disparar esta campanha para todos os contatos?')) return
+    setSending(id)
+    try {
+      const res = await api.post(`/campaigns/${id}/send`, {})
+      alert(`Disparo iniciado! Total de contatos: ${res.data.total}`)
+      loadCampaigns()
+    } catch {
+      alert('Erro ao disparar campanha')
+    } finally {
+      setSending(null)
     }
   }
 
@@ -82,7 +101,7 @@ export default function Campaigns() {
 
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">
-                  Mensagem — use nome para personalizar
+                  Mensagem — use {`{{nome}}`} para personalizar
                 </label>
                 <textarea
                   value={message}
@@ -91,7 +110,7 @@ export default function Campaigns() {
                     setPreview(renderPreview(e.target.value))
                   }}
                   className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-green-500 h-32 resize-none"
-                  placeholder="Olá, temos uma oferta especial para você!"
+                  placeholder="Olá {{nome}}, temos uma oferta especial para você!"
                   required
                 />
               </div>
@@ -134,17 +153,28 @@ export default function Campaigns() {
             {campaigns.map(c => (
               <div key={c.id} className="bg-gray-900 rounded-xl p-6">
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-semibold text-white">{c.name}</h3>
                     <p className="text-gray-400 text-sm mt-1">{c.message}</p>
                   </div>
-                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                    c.status === 'draft' ? 'bg-gray-800 text-gray-400' :
-                    c.status === 'sent' ? 'bg-green-900 text-green-400' :
-                    'bg-yellow-900 text-yellow-400'
-                  }`}>
-                    {c.status === 'draft' ? 'Rascunho' : c.status}
-                  </span>
+                  <div className="flex items-center gap-3 ml-4">
+                    <span className={`text-xs px-3 py-1 rounded-full font-medium ${
+                      c.status === 'draft' ? 'bg-gray-800 text-gray-400' :
+                      c.status === 'sent' ? 'bg-green-900 text-green-400' :
+                      'bg-yellow-900 text-yellow-400'
+                    }`}>
+                      {c.status === 'draft' ? 'Rascunho' : c.status === 'sent' ? 'Enviado' : c.status}
+                    </span>
+                    {c.status === 'draft' && (
+                      <button
+                        onClick={() => handleSend(c.id)}
+                        disabled={sending === c.id}
+                        className="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50"
+                      >
+                        {sending === c.id ? 'Disparando...' : '▶ Disparar'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
