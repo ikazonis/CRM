@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -52,14 +54,20 @@ func (s *Service) SendText(ctx context.Context, phone, text string) error {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Client-Token", s.clientToken)
 
+	log.Printf("enviando para %s via Z-API", phone)
+
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
+		log.Printf("erro HTTP ao enviar para %s: %v", phone, err)
 		return err
 	}
 	defer resp.Body.Close()
 
+	respBody, _ := io.ReadAll(resp.Body)
+	log.Printf("resposta Z-API para %s: status=%d body=%s", phone, resp.StatusCode, string(respBody))
+
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("zapi retornou status %d", resp.StatusCode)
+		return fmt.Errorf("zapi retornou status %d: %s", resp.StatusCode, string(respBody))
 	}
 
 	return nil
