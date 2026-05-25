@@ -36,11 +36,14 @@ type SendResult struct {
 }
 
 func (s *Service) SendText(ctx context.Context, phone, text string) error {
+	//	url := fmt.Sprintf(
+	//		"https://api.z-api.io/instances/%s/token/%s/send-text",
+	//		s.instanceID, s.token,
+	//	)
 	url := fmt.Sprintf(
-		"https://api.z-api.io/instances/%s/token/%s/send-text",
+		"https://api.z-api.io/instances/%s/token/%s/send-messages",
 		s.instanceID, s.token,
 	)
-
 	body := map[string]string{
 		"phone":   phone,
 		"message": text,
