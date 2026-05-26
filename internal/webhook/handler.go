@@ -8,7 +8,6 @@ import (
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	// verificação do webhook pelo Meta
 	if r.Method == http.MethodGet {
 		mode := r.URL.Query().Get("hub.mode")
 		token := r.URL.Query().Get("hub.verify_token")
@@ -24,14 +23,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// recebe eventos do Meta
 	if r.Method == http.MethodPost {
 		var payload map[string]any
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("webhook recebido: %+v", payload)
+		log.Printf("webhook z-api recebido: %+v", payload)
 		w.WriteHeader(http.StatusOK)
 		return
 	}
