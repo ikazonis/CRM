@@ -75,6 +75,7 @@ func (h *Handler) Send(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Printf("disparo concluído: %d/%d enviados", sent, len(phones))
 		h.campaignRepo.UpdateStatus(context.Background(), id, companyID, "sent")
+		h.campaignRepo.UpdateSentCount(context.Background(), id, companyID, sent)
 	}()
 
 	httputil.JSON(w, http.StatusOK, map[string]any{
