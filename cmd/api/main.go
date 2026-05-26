@@ -35,6 +35,8 @@ func main() {
 	pool := db.Connect(cfg.DatabaseURL)
 	defer pool.Close()
 
+	webhook.SetDB(pool)
+
 	authSvc := auth.NewService(pool, cfg.JWTSecret, cfg.JWTExpiryHours)
 	authHandler := auth.NewHandler(authSvc)
 
@@ -73,7 +75,6 @@ func main() {
 	protected.HandleFunc("GET /contacts", contactHandler.List)
 	protected.HandleFunc("POST /contacts", contactHandler.Create)
 	protected.HandleFunc("POST /contacts/import", contactHandler.ImportCSV)
-	// protected.HandleFunc("DELETE /contacts", contactHandler.DeleteAll)
 	protected.HandleFunc("PUT /contacts/{id}", contactHandler.Update)
 	protected.HandleFunc("DELETE /contacts/{id}", contactHandler.Delete)
 	protected.HandleFunc("GET /segments", segmentHandler.List)
@@ -85,7 +86,6 @@ func main() {
 	protected.HandleFunc("POST /campaigns/{id}/send", messageHandler.Send)
 	protected.HandleFunc("PUT /campaigns/{id}", campaignHandler.Update)
 	protected.HandleFunc("DELETE /campaigns/{id}", campaignHandler.Delete)
-	// protected.HandleFunc("DELETE /contacts", contactHandler.DeleteAll)
 	protected.HandleFunc("POST /messages/test", messageHandler.SendTest)
 	protected.HandleFunc("GET /dashboard", dashboardHandler.Stats)
 
