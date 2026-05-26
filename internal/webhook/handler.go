@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -14,6 +15,18 @@ var db *pgxpool.Pool
 
 func SetDB(pool *pgxpool.Pool) {
 	db = pool
+}
+
+func normalizePhone(phone string) string {
+	// remove @lid, @s.whatsapp.net etc
+	if idx := strings.Index(phone, "@"); idx != -1 {
+		phone = phone[:idx]
+	}
+	// adiciona 55 se não tiver
+	if !strings.HasPrefix(phone, "55") {
+		phone = "55" + phone
+	}
+	return phone
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +56,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		eventType, _ := payload["type"].(string)
 		status, _ := payload["status"].(string)
-		phone, _ := payload["phone"].(string)
+		rawPhone, _ := payload["phone"].(string)
+		phone := normalizePhone(rawPhone)
+
+		log.Printf("webhook processando: type=%s status=%s phone=%s", eventType, status, phone)
 
 		if db != nil && phone != "" {
 			switch {
@@ -62,6 +78,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				`, phone)
 				if err != nil {
 					log.Printf("erro ao atualizar delivered_count: %v", err)
+				} else {
+					log.Printf("delivered_count atualizado para phone=%s", phone)
 				}
 
 			case eventType == "ReceivedCallback":
@@ -79,6 +97,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				`, phone)
 				if err != nil {
 					log.Printf("erro ao atualizar response_count: %v", err)
+				} else {
+					log.Printf("response_count atualizado para phone=%s", phone)
 				}
 			}
 		}
