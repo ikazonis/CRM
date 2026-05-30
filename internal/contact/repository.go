@@ -15,10 +15,18 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 }
 
 type Contact struct {
-	ID        string `json:"id"`
-	CompanyID string `json:"company_id"`
-	Name      string `json:"name"`
-	Phone     string `json:"phone"`
+	ID        string  `json:"id"`
+	CompanyID string  `json:"company_id"`
+	Name      string  `json:"name"`
+	Phone     string  `json:"phone"`
+	Email     *string `json:"email,omitempty"`
+	BirthDate *string `json:"birth_date,omitempty"`
+	Gender    *string `json:"gender,omitempty"`
+	IsVip     bool    `json:"is_vip"`
+	Zipcode   *string `json:"zipcode,omitempty"`
+	Address   *string `json:"address,omitempty"`
+	City      *string `json:"city,omitempty"`
+	State     *string `json:"state,omitempty"`
 }
 
 type ListResult struct {
@@ -30,16 +38,19 @@ type ListResult struct {
 
 func (r *Repository) Upsert(ctx context.Context, c Contact) error {
 	_, err := r.db.Exec(ctx, `
-		INSERT INTO contacts (company_id, name, phone)
-		VALUES ($1, $2, $3)
+		INSERT INTO contacts (company_id, name, phone, email, birth_date, gender, is_vip, zipcode, address, city, state)
+		VALUES ($1, $2, $3, $4, $5::date, $6, $7, $8, $9, $10, $11)
 		ON CONFLICT (company_id, phone) DO UPDATE SET name = EXCLUDED.name
-	`, c.CompanyID, c.Name, c.Phone)
+	`, c.CompanyID, c.Name, c.Phone, c.Email, c.BirthDate, c.Gender, c.IsVip,
+		c.Zipcode, c.Address, c.City, c.State)
 	return err
 }
 
 func (r *Repository) ListByCompany(ctx context.Context, companyID string) ([]Contact, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, company_id, name, phone
+		SELECT id, company_id, name, phone,
+			email, birth_date::text, gender, is_vip,
+			zipcode, address, city, state
 		FROM contacts
 		WHERE company_id = $1
 		ORDER BY name
@@ -52,7 +63,9 @@ func (r *Repository) ListByCompany(ctx context.Context, companyID string) ([]Con
 	var contacts []Contact
 	for rows.Next() {
 		var c Contact
-		if err := rows.Scan(&c.ID, &c.CompanyID, &c.Name, &c.Phone); err != nil {
+		if err := rows.Scan(&c.ID, &c.CompanyID, &c.Name, &c.Phone,
+			&c.Email, &c.BirthDate, &c.Gender, &c.IsVip,
+			&c.Zipcode, &c.Address, &c.City, &c.State); err != nil {
 			return nil, err
 		}
 		contacts = append(contacts, c)
@@ -75,7 +88,9 @@ func (r *Repository) ListPaginated(ctx context.Context, companyID, search string
 	}
 
 	rows, err := r.db.Query(ctx, `
-		SELECT id, company_id, name, phone
+		SELECT id, company_id, name, phone,
+			email, birth_date::text, gender, is_vip,
+			zipcode, address, city, state
 		FROM contacts
 		WHERE company_id = $1
 		AND opted_out = FALSE
@@ -91,7 +106,9 @@ func (r *Repository) ListPaginated(ctx context.Context, companyID, search string
 	var contacts []Contact
 	for rows.Next() {
 		var c Contact
-		if err := rows.Scan(&c.ID, &c.CompanyID, &c.Name, &c.Phone); err != nil {
+		if err := rows.Scan(&c.ID, &c.CompanyID, &c.Name, &c.Phone,
+			&c.Email, &c.BirthDate, &c.Gender, &c.IsVip,
+			&c.Zipcode, &c.Address, &c.City, &c.State); err != nil {
 			return ListResult{}, err
 		}
 		contacts = append(contacts, c)
@@ -105,11 +122,15 @@ func (r *Repository) ListPaginated(ctx context.Context, companyID, search string
 	}, nil
 }
 
-func (r *Repository) Update(ctx context.Context, id, companyID, name, phone string) error {
+func (r *Repository) Update(ctx context.Context, c Contact) error {
 	_, err := r.db.Exec(ctx, `
-		UPDATE contacts SET name = $1, phone = $2
-		WHERE id = $3 AND company_id = $4
-	`, name, phone, id, companyID)
+		UPDATE contacts SET
+			name = $1, phone = $2, email = $3,
+			birth_date = $4::date, gender = $5, is_vip = $6,
+			zipcode = $7, address = $8, city = $9, state = $10
+		WHERE id = $11 AND company_id = $12
+	`, c.Name, c.Phone, c.Email, c.BirthDate, c.Gender, c.IsVip,
+		c.Zipcode, c.Address, c.City, c.State, c.ID, c.CompanyID)
 	return err
 }
 

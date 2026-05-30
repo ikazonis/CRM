@@ -41,8 +41,16 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Name  string `json:"name"`
-		Phone string `json:"phone"`
+		Name      string  `json:"name"`
+		Phone     string  `json:"phone"`
+		Email     *string `json:"email"`
+		BirthDate *string `json:"birth_date"`
+		Gender    *string `json:"gender"`
+		IsVip     bool    `json:"is_vip"`
+		Zipcode   *string `json:"zipcode"`
+		Address   *string `json:"address"`
+		City      *string `json:"city"`
+		State     *string `json:"state"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httputil.Error(w, http.StatusBadRequest, "payload inválido")
@@ -54,7 +62,19 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.svc.Create(r.Context(), companyID, req.Name, req.Phone); err != nil {
+	if err := h.svc.Create(r.Context(), Contact{
+		CompanyID: companyID,
+		Name:      req.Name,
+		Phone:     req.Phone,
+		Email:     req.Email,
+		BirthDate: req.BirthDate,
+		Gender:    req.Gender,
+		IsVip:     req.IsVip,
+		Zipcode:   req.Zipcode,
+		Address:   req.Address,
+		City:      req.City,
+		State:     req.State,
+	}); err != nil {
 		httputil.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -72,16 +92,37 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimPrefix(r.URL.Path, "/contacts/")
 
 	var req struct {
-		Name  string `json:"name"`
-		Phone string `json:"phone"`
+		Name      string  `json:"name"`
+		Phone     string  `json:"phone"`
+		Email     *string `json:"email"`
+		BirthDate *string `json:"birth_date"`
+		Gender    *string `json:"gender"`
+		IsVip     bool    `json:"is_vip"`
+		Zipcode   *string `json:"zipcode"`
+		Address   *string `json:"address"`
+		City      *string `json:"city"`
+		State     *string `json:"state"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httputil.Error(w, http.StatusBadRequest, "payload inválido")
 		return
 	}
 
-	if err := h.svc.Update(r.Context(), id, companyID, req.Name, req.Phone); err != nil {
-		httputil.Error(w, http.StatusInternalServerError, "erro ao atualizar contato")
+	if err := h.svc.Update(r.Context(), Contact{
+		ID:        id,
+		CompanyID: companyID,
+		Name:      req.Name,
+		Phone:     req.Phone,
+		Email:     req.Email,
+		BirthDate: req.BirthDate,
+		Gender:    req.Gender,
+		IsVip:     req.IsVip,
+		Zipcode:   req.Zipcode,
+		Address:   req.Address,
+		City:      req.City,
+		State:     req.State,
+	}); err != nil {
+		httputil.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
 

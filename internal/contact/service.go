@@ -31,24 +31,43 @@ func (s *Service) ListPaginated(ctx context.Context, companyID, search string, p
 	return s.repo.ListPaginated(ctx, companyID, search, page, pageSize)
 }
 
-func (s *Service) Create(ctx context.Context, companyID, name, phone string) error {
-	normalized, ok := validate.NormalizePhone(phone)
-	if !ok {
-		return fmt.Errorf("telefone inválido")
+func nilIfEmpty(s *string) *string {
+	if s != nil && *s == "" {
+		return nil
 	}
-	return s.repo.Upsert(ctx, Contact{
-		CompanyID: companyID,
-		Name:      name,
-		Phone:     normalized,
-	})
+	return s
 }
 
-func (s *Service) Update(ctx context.Context, id, companyID, name, phone string) error {
-	normalized, ok := validate.NormalizePhone(phone)
+func (s *Service) Create(ctx context.Context, c Contact) error {
+	normalized, ok := validate.NormalizePhone(c.Phone)
 	if !ok {
 		return fmt.Errorf("telefone inválido")
 	}
-	return s.repo.Update(ctx, id, companyID, name, normalized)
+	c.Phone = normalized
+	c.Email = nilIfEmpty(c.Email)
+	c.BirthDate = nilIfEmpty(c.BirthDate)
+	c.Gender = nilIfEmpty(c.Gender)
+	c.Zipcode = nilIfEmpty(c.Zipcode)
+	c.Address = nilIfEmpty(c.Address)
+	c.City = nilIfEmpty(c.City)
+	c.State = nilIfEmpty(c.State)
+	return s.repo.Upsert(ctx, c)
+}
+
+func (s *Service) Update(ctx context.Context, c Contact) error {
+	normalized, ok := validate.NormalizePhone(c.Phone)
+	if !ok {
+		return fmt.Errorf("telefone inválido")
+	}
+	c.Phone = normalized
+	c.Email = nilIfEmpty(c.Email)
+	c.BirthDate = nilIfEmpty(c.BirthDate)
+	c.Gender = nilIfEmpty(c.Gender)
+	c.Zipcode = nilIfEmpty(c.Zipcode)
+	c.Address = nilIfEmpty(c.Address)
+	c.City = nilIfEmpty(c.City)
+	c.State = nilIfEmpty(c.State)
+	return s.repo.Update(ctx, c)
 }
 
 func (s *Service) Delete(ctx context.Context, id, companyID string) error {
