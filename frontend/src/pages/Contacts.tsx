@@ -51,14 +51,25 @@ export default function Contacts() {
     setPhone('')
   }
 
+  const isPhoneValid = (val: string) => {
+    const clean = val.replace(/[\s\-\(\)]/g, '')
+    return /^55[1-9][1-9]\d{8,9}$/.test(clean)
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '')
+    if (!isPhoneValid(cleanPhone)) {
+      alert('Telefone inválido. Deve seguir o formato: 55 + DDD + Número (ex: 552199999999 ou 5521999999999).')
+      return
+    }
+
     setSaving(true)
     try {
       if (editing) {
-        await api.put(`/contacts/${editing.id}`, { name, phone })
+        await api.put(`/contacts/${editing.id}`, { name, phone: cleanPhone })
       } else {
-        await api.post('/contacts', { name, phone })
+        await api.post('/contacts', { name, phone: cleanPhone })
       }
       await loadContacts()
       closeForm()
@@ -87,17 +98,9 @@ export default function Contacts() {
 
       <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Contatos</h2>
+          <h2 className="text-xl font-bold tracking-wide select-none">Contatos</h2>
           <div className="flex gap-3">
-            {/* {contacts.length > 0 && (
-              <button
-                onClick={handleDeleteAll}
-                className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
-              >
-                Limpar tudo
-              </button>
-            )} */}
-            <label className="bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold px-4 py-2 rounded-lg cursor-pointer transition">
+            <label className="bg-gray-700 hover:bg-gray-600 active:scale-[0.98] text-white text-xs font-bold px-4 py-2.5 rounded-md cursor-pointer transition duration-150 select-none">
               Importar CSV
               <input
                 type="file"
@@ -116,7 +119,7 @@ export default function Contacts() {
             </label>
             <button
               onClick={openCreate}
-              className="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
+              className="bg-green-500 hover:bg-green-600 active:scale-[0.98] text-white text-xs font-bold px-4 py-2.5 rounded-md transition duration-150 cursor-pointer select-none"
             >
               Novo contato
             </button>
@@ -124,45 +127,50 @@ export default function Contacts() {
         </div>
 
         {showForm && (
-          <div className="bg-gray-900 rounded-xl p-6 mb-6">
-            <h3 className="text-lg font-semibold mb-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-md p-6 mb-6">
+            <h3 className="text-md font-bold text-white uppercase tracking-wider mb-4">
               {editing ? 'Editar contato' : 'Novo contato'}
             </h3>
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="text-sm text-gray-400 mb-1 block">Nome</label>
+                <label className="text-xs font-semibold text-gray-400 mb-1 block uppercase tracking-wider">Nome</label>
                 <input
                   type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full bg-gray-950 border border-gray-800 text-white text-sm rounded-md px-3.5 py-2.5 outline-none focus:border-gray-500 transition-all duration-200"
                   placeholder="Nome do contato"
                   required
                 />
               </div>
               <div>
-                <label className="text-sm text-gray-400 mb-1 block">Telefone</label>
+                <label className="text-xs font-semibold text-gray-400 mb-1 block uppercase tracking-wider">Telefone</label>
                 <input
                   type="text"
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
-                  className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full bg-gray-950 border border-gray-800 text-white text-sm rounded-md px-3.5 py-2.5 outline-none focus:border-gray-500 transition-all duration-200"
                   placeholder="5521999990001"
                   required
                 />
+                {phone && !isPhoneValid(phone) && (
+                  <p className="text-red-500 text-xs mt-1 font-semibold">
+                    Formato inválido. Use: 55 + DDD + Número (ex: 552199999999)
+                  </p>
+                )}
               </div>
               <div className="flex gap-3">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-lg transition disabled:opacity-50"
+                  className="bg-green-500 hover:bg-green-600 active:scale-[0.98] text-white text-xs font-bold px-5 py-2 rounded-md transition duration-150 disabled:opacity-50 cursor-pointer select-none"
                 >
                   {saving ? 'Salvando...' : 'Salvar'}
                 </button>
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="bg-gray-800 hover:bg-gray-700 text-white font-semibold px-6 py-2 rounded-lg transition"
+                  className="bg-gray-800 hover:bg-gray-700 active:scale-[0.98] text-white text-xs font-bold px-5 py-2 rounded-md transition duration-150 cursor-pointer select-none"
                 >
                   Cancelar
                 </button>
@@ -172,16 +180,16 @@ export default function Contacts() {
         )}
 
         {loading ? (
-          <p className="text-gray-400">Carregando...</p>
+          <p className="text-gray-400 text-sm">Carregando...</p>
         ) : contacts.length === 0 ? (
-          <div className="bg-gray-900 rounded-xl p-8 text-center text-gray-400">
+          <div className="bg-gray-900 border border-gray-800 rounded-md p-8 text-center text-gray-400 text-sm font-medium">
             Nenhum contato ainda. Crie um ou importe um CSV.
           </div>
         ) : (
-          <div className="bg-gray-900 rounded-xl overflow-hidden">
+          <div className="bg-gray-900 border border-gray-800 rounded-md overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-800 text-left text-sm text-gray-400">
+                <tr className="border-b border-gray-800 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                   <th className="px-6 py-4">Nome</th>
                   <th className="px-6 py-4">Telefone</th>
                   <th className="px-6 py-4 text-right">Ações</th>
@@ -189,20 +197,20 @@ export default function Contacts() {
               </thead>
               <tbody>
                 {contacts.map(c => (
-                  <tr key={c.id} className="border-b border-gray-800 hover:bg-gray-800 transition">
-                    <td className="px-6 py-4">{c.name}</td>
-                    <td className="px-6 py-4 text-gray-400">{c.phone}</td>
+                  <tr key={c.id} className="border-b border-gray-800 hover:bg-gray-950 transition duration-150">
+                    <td className="px-6 py-4 text-sm font-semibold">{c.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-400 font-medium">{c.phone}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex gap-2 justify-end">
                         <button
                           onClick={() => openEdit(c)}
-                          className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg transition"
+                          className="text-xs font-semibold bg-gray-700 hover:bg-gray-600 active:scale-[0.96] text-white px-3.5 py-1.5 rounded-md transition duration-150 cursor-pointer select-none"
                         >
                           Editar
                         </button>
                         <button
                           onClick={() => handleDelete(c.id)}
-                          className="text-xs bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition"
+                          className="text-xs font-semibold bg-red-950/40 hover:bg-red-900/60 active:scale-[0.96] text-red-400 px-3.5 py-1.5 rounded-md transition duration-150 cursor-pointer select-none border border-red-900/30"
                         >
                           Excluir
                         </button>

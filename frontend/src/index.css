@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+@theme {
+  /* Override default Tailwind colors to match Instagram Dark Mode */
+  --color-gray-950: #000000; /* Main app background - pitch black */
+  --color-gray-900: #121212; /* Section/card background - dark grey */
+  --color-gray-800: #262626; /* Borders and dividers */
+  --color-gray-700: #363636; /* Inputs background and secondary buttons */
+  
+  /* Map green color utilities (primary theme colors in current app) to Instagram Blue */
+  --color-green-400: #0095f6; /* Accent color / links */
+  --color-green-500: #0095f6; /* Primary button background */
+  --color-green-600: #1877f2; /* Primary button hover background */
+}
+
+/* Custom Instagram Brand Gradient Utilities */
+@utility bg-instagram-gradient {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+@utility text-instagram-gradient {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

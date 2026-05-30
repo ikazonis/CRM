@@ -25,51 +25,57 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <div className="bg-gray-900 p-8 rounded-2xl w-full max-w-md shadow-xl">
-        <h1 className="text-2xl font-bold text-white mb-2">CRM WhatsApp</h1>
-        <p className="text-gray-400 mb-8">Entre na sua conta</p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+      <div className="bg-gray-900 border border-gray-800 p-10 rounded-md w-full max-w-sm flex flex-col items-center">
+        <h1 className="text-3xl font-extrabold tracking-wide text-instagram-gradient mb-2 select-none">
+          CRM WhatsApp
+        </h1>
+        <p className="text-gray-400 text-sm mb-8 text-center font-medium">
+          Entre para ver estatísticas de suas campanhas
+        </p>
+ 
+        <form onSubmit={handleSubmit} className="space-y-4 w-full">
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">Email</label>
+            <label className="text-xs font-semibold text-gray-400 mb-1 block uppercase tracking-wider">Email</label>
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full bg-gray-950 border border-gray-800 text-white text-sm rounded-md px-3.5 py-2.5 outline-none focus:border-gray-500 transition-all duration-200"
               placeholder="seu@email.com"
               required
             />
           </div>
-
+ 
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">Senha</label>
+            <label className="text-xs font-semibold text-gray-400 mb-1 block uppercase tracking-wider">Senha</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full bg-gray-800 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full bg-gray-950 border border-gray-800 text-white text-sm rounded-md px-3.5 py-2.5 outline-none focus:border-gray-500 transition-all duration-200"
               placeholder="••••••••"
               required
             />
           </div>
-
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-
+ 
+          {error && <p className="text-red-500 text-xs text-center font-medium">{error}</p>}
+ 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+            className="w-full bg-green-500 hover:bg-green-600 active:scale-[0.98] text-white font-semibold text-sm py-2.5 rounded-md transition-all duration-150 disabled:opacity-50 cursor-pointer select-none"
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
-
-        <p className="text-gray-500 text-sm text-center mt-6">
-          Não tem conta?{' '}
-          <a href="/register" className="text-green-400 hover:underline">
-            Criar conta
+ 
+        <div className="w-full border-t border-gray-800 my-6"></div>
+ 
+        <p className="text-gray-400 text-sm text-center">
+          Não tem uma conta?{' '}
+          <a href="/register" className="text-green-400 font-bold hover:underline">
+            Cadastre-se
           </a>
         </p>
       </div>

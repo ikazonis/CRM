@@ -17,16 +17,21 @@ export default function Navbar() {
 
   return (
     <nav className="bg-gray-900 px-6 py-4 flex justify-between items-center border-b border-gray-800">
-      <h1 className="text-lg font-bold text-green-400">CRM WhatsApp</h1>
+      <h1 
+        className="text-xl font-extrabold tracking-wide text-instagram-gradient cursor-pointer select-none"
+        onClick={() => navigate('/dashboard')}
+      >
+        CRM WhatsApp
+      </h1>
       <div className="flex gap-6 items-center">
         {links.map(link => (
           <button
             key={link.path}
             onClick={() => navigate(link.path)}
-            className={`text-sm transition ${
+            className={`text-sm transition-all duration-200 cursor-pointer ${
               location.pathname === link.path
-                ? 'text-white font-semibold'
-                : 'text-gray-400 hover:text-white'
+                ? 'text-white font-bold'
+                : 'text-gray-400 hover:text-white font-medium'
             }`}
           >
             {link.label}
@@ -34,7 +39,7 @@ export default function Navbar() {
         ))}
         <button
           onClick={logout}
-          className="text-sm text-gray-400 hover:text-white transition"
+          className="text-sm text-gray-400 hover:text-red-400 font-medium transition-all duration-200 cursor-pointer"
         >
           Sair
         </button>

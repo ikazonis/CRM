@@ -21,6 +21,16 @@ func (s *Service) List(ctx context.Context, companyID string) ([]Contact, error)
 	return s.repo.ListByCompany(ctx, companyID)
 }
 
+func (s *Service) ListPaginated(ctx context.Context, companyID, search string, page, pageSize int) (ListResult, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+	return s.repo.ListPaginated(ctx, companyID, search, page, pageSize)
+}
+
 func (s *Service) Create(ctx context.Context, companyID, name, phone string) error {
 	normalized, ok := validate.NormalizePhone(phone)
 	if !ok {
@@ -34,16 +44,20 @@ func (s *Service) Create(ctx context.Context, companyID, name, phone string) err
 }
 
 func (s *Service) Update(ctx context.Context, id, companyID, name, phone string) error {
-	return s.repo.Update(ctx, id, companyID, name, phone)
+	normalized, ok := validate.NormalizePhone(phone)
+	if !ok {
+		return fmt.Errorf("telefone inválido")
+	}
+	return s.repo.Update(ctx, id, companyID, name, normalized)
 }
 
 func (s *Service) Delete(ctx context.Context, id, companyID string) error {
 	return s.repo.Delete(ctx, id, companyID)
 }
 
-// func (s *Service) DeleteAll(ctx context.Context, companyID string) error {
-// 	return s.repo.DeleteAll(ctx, companyID)
-// }
+func (s *Service) DeleteAll(ctx context.Context, companyID string) error {
+	return s.repo.DeleteAll(ctx, companyID)
+}
 
 func (s *Service) ImportCSV(ctx context.Context, companyID string, r io.Reader) (int, int, error) {
 	reader := csv.NewReader(r)
